@@ -16,7 +16,7 @@ get_data <- function(num_records=-1) {
 #       be initialized
 #----------------------------------------------------------------------------#
 # Return the list of states in a region.  The regions are: 
-#    Midwest, Northeast, South, West
+# Midwest, Northeast, South, West
 #----------------------------------------------------------------------------#
 states_in_region <- function(p_region) {
   the_states <- incarceration_df %>%
