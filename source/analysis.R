@@ -104,12 +104,31 @@ get_jail_pop_by_states <- function(states) {
   return(jail_pop_states)   
 }
 
+# This function returns a line chart of the total 
+# jail population per state each year
+plot_jail_pop_by_states <- function(states) {
+  df <- get_jail_pop_by_states(states)
+  state_chart <-
+    ggplot(df, aes(x, color = variable)) +
+    ggtitle("US Prison Population from 1970 to 2018 (by State)")
+  for (i in 2:ncol(df)) {
+  # Not really sure how to do the multiple lines
+    state_chart <-
+      geom_line(aes(y = df[i], col = df[[i]]))
+  }
+  return(state_chart)
+}
+
+test_chart <- plot_jail_pop_by_states(c("WA", "CT", "NY"))
 ## Section 5  ---- 
 #----------------------------------------------------------------------------#
 # <variable comparison that reveals potential patterns of inequality>
 # Your functions might go here ... <todo:  update comment>
 # See Canvas
 #----------------------------------------------------------------------------#
+get_jail_pop_by_race <- function() {
+  
+}
 
 ## Section 6  ---- 
 #----------------------------------------------------------------------------#
