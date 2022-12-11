@@ -101,24 +101,24 @@ get_jail_pop_by_states <- function(states) {
     jail_pop_states <- jail_pop_states %>%
       add_column(!!item := new_column$temp)
   }
+  jail_pop_states <- jail_pop_states %>%
+    select(states, year) %>%
+    gather(key = "State", value = "jail_pop", -year)
   return(jail_pop_states)   
 }
 
 # This function returns a line chart of the total 
 # jail population per state each year
 plot_jail_pop_by_states <- function(states) {
-  df <- get_jail_pop_by_states(states)
+  df <- get_jail_pop_by_states(c("WA", "CT", "NY"))
   state_chart <-
-    ggplot(df, aes(x, color = variable)) +
-    ggtitle("US Prison Population from 1970 to 2018 (by State)")
-  for (i in 2:ncol(df)) {
-  # Not really sure how to do the multiple lines
-    state_chart <-
-      geom_line(aes(y = df[i], col = df[[i]]))
-  }
+    ggplot(df, aes(x = year, y = jail_pop)) +
+    ggtitle("US Prison Population from 1970 to 2018 (by State)") +
+    geom_line(aes(color = State)) +
+    labs(x = "Year", y = "Jail Population")
+
   return(state_chart)
 }
-
 test_chart <- plot_jail_pop_by_states(c("WA", "CT", "NY"))
 ## Section 5  ---- 
 #----------------------------------------------------------------------------#
@@ -126,10 +126,46 @@ test_chart <- plot_jail_pop_by_states(c("WA", "CT", "NY"))
 # Your functions might go here ... <todo:  update comment>
 # See Canvas
 #----------------------------------------------------------------------------#
-get_jail_pop_by_race <- function() {
-  
+get_jail_pop_by_race <- function(state_focus, races) {
+  jail_pop_races <- incarceration_df %>%
+    select(year, state, races, total_jail_pop) %>%
+    filter(state == state_focus) %>%
+    group_by(year) %>%
+    summarize_if(is.numeric, sum, na.rm=TRUE) %>%
+    ungroup() %>%
+    distinct(year, .keep_all = TRUE) %>%
+    filter(year > 1984) %>%
+    select(total_jail_pop, races, year) %>%
+    gather(key = "Races", value = "jail_pop", -year) %>%
+    mutate(Races = recode(Races, 
+                          aapi_jail_pop = 'AAPI',
+                          black_jail_pop = 'Black',
+                          latinx_jail_pop =  'Latinx',
+                          native_jail_pop = "Native",
+                          white_jail_pop = "White",
+                          total_jail_pop = "Total Population"))
+  return(jail_pop_races)
 }
 
+# This function returns a line chart of the total state
+# jail population per race (must be specified in a vector) each year
+plot_jail_pop_by_race <- function(state_focus) {
+  races <- c("aapi_jail_pop", 
+             "black_jail_pop", 
+             "latinx_jail_pop", 
+             "native_jail_pop", 
+             "white_jail_pop")
+  df <- get_jail_pop_by_race(state_focus, races)
+  chart <-
+    ggplot(df, aes(x = year, y = jail_pop)) +
+    ggtitle(paste(state_focus, "Prison Population from 1984 to 2018 (by Race)")) +
+    geom_line(aes(color = Races)) +
+    labs(x = "Year", y = "Jail Population")
+  
+  return(chart)
+}
+
+test <- plot_jail_pop_by_race("WA")
 ## Section 6  ---- 
 #----------------------------------------------------------------------------#
 # <a map shows potential patterns of inequality that vary geographically>
